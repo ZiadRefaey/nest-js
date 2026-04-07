@@ -1,6 +1,1 @@
-export class CreateTaskDto {
-  id?: number;
-  title?: string;
-  description?: string;
-  completed?: boolean;
-}
+export { CreateTaskDto } from '../../tasks/dto/create-task.dto';

@@ -1,0 +1,34 @@
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  NestInterceptor,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { Request } from 'express';
+
+type RequestWithRoute = Request & {
+  method: string;
+  originalUrl?: string;
+  url: string;
+};
+
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(LoggingInterceptor.name);
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<RequestWithRoute>();
+    const { method } = request;
+    const path = request.originalUrl ?? request.url;
+    const startedAt = Date.now();
+
+    return next.handle().pipe(
+      tap(() => {
+        this.logger.log(`[${method}] ${path} - ${Date.now() - startedAt}ms`);
+      }),
+    );
+  }
+}
